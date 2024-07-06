@@ -1,3 +1,4 @@
 streamlit
-gtts 
-pydub 
+gtts
+SpeechRecognition
+pydub
