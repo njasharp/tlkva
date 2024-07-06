@@ -1,5 +1,5 @@
-streamlit
-gtts
-pyautogui
-SpeechRecognition
-pydub
+streamlit==1.10.0
+gtts==2.2.3
+pyautogui==0.9.53
+SpeechRecognition==3.8.1
+pydub==0.25.1
