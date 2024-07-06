@@ -1,4 +1,1 @@
 streamlit==1.22.0
-gtts==2.2.3
-pydub==0.25.1
-Pillow==9.5.0
