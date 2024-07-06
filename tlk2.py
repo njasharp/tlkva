@@ -32,7 +32,7 @@ def main():
     st.title("Virtual Assistant")
     
     # Display the image
-    img_path = "face.png"  # Correct the path to the uploaded image
+    img_path = "face.PNG"  # Correct the path to the uploaded image
     try:
         img = Image.open(img_path)
         st.image(img, width=120)
