@@ -42,7 +42,7 @@ def main():
     
     st.sidebar.title("Brian C - wakeup word 'ready'")
     st.sidebar.write("Interact with the assistant using the text input below.")
-    st.sidebar.write("Options: ready, add task, list tasks, open youtube, exit")
+    st.sidebar.write("Options: ready, add tasks, list tasks, open youtube, exit")
 
     command = st.text_input("Enter your command (or type 'ready' to wake up):")
     triggerKeyword = "ready"
