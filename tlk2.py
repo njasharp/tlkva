@@ -1,16 +1,7 @@
 import streamlit as st
-from gtts import gTTS
-from pydub import AudioSegment
-import webbrowser
-from io import BytesIO
 
 def respond(response_text):
     st.write(response_text)
-    tts = gTTS(text=response_text, lang='en')
-    tts.save("response.mp3")
-    sound = AudioSegment.from_mp3("response.mp3")
-    sound.export("response.wav", format="wav")
-    st.audio("response.wav")
 
 def new_task():
     st.write("Adding new task")
@@ -30,11 +21,10 @@ def main():
         st.session_state.moretasks = []
 
     st.title("Virtual Assistant")
-    
+
     img_path = "face.png"  # Correct the path to the uploaded image
     try:
-        img = img_path
-        st.image(img, width=120)
+        st.image(img_path, width=120)
     except FileNotFoundError:
         st.warning("Image not found. Please check the path or upload the image.")
     
