@@ -1,20 +1,20 @@
 import streamlit as st
-from PIL import Image
-
-def listen_for_command():
-    command = st.text_input("Enter your command:")
-    if command:
-        st.write("You entered:", command)
-        respond(command)
-        return command.lower()
-    return None
+from gtts import gTTS
+from pydub import AudioSegment
+import webbrowser
+from io import BytesIO
 
 def respond(response_text):
     st.write(response_text)
+    tts = gTTS(text=response_text, lang='en')
+    tts.save("response.mp3")
+    sound = AudioSegment.from_mp3("response.mp3")
+    sound.export("response.wav", format="wav")
+    st.audio("response.wav")
 
 def new_task():
     st.write("Adding new task")
-    new_task = st.text_input("Type new task", key="new_task_input")
+    new_task = st.text_area("Type new task", key="new_task_input")
     if new_task:
         st.session_state.moretasks.append(new_task)
         st.success(f"Added '{new_task}' to your task list.")
@@ -31,26 +31,25 @@ def main():
 
     st.title("Virtual Assistant")
     
-    # Display the image
     img_path = "face.png"  # Correct the path to the uploaded image
     try:
-        img = Image.open(img_path)
+        img = img_path
         st.image(img, width=120)
     except FileNotFoundError:
         st.warning("Image not found. Please check the path or upload the image.")
     
-    st.sidebar.title("Brian C- wakeup word 'ready'")
+    st.sidebar.title("Brian C - wakeup word 'ready'")
     st.sidebar.write("Interact with the assistant using the text input below.")
     st.sidebar.write("Options: ready, add task, list tasks, open youtube, exit")
 
-    command = listen_for_command()
+    command = st.text_input("Enter your command (or type 'ready' to wake up):")
     triggerKeyword = "ready"
     
     if command:
         if st.session_state.listeningToTask:
             st.session_state.tasks.append(command)
             st.session_state.listeningToTask = False
-            respond(f"Adding {command} to your task list. You have {len(st.session_state.tasks)} currently in your list.")
+            respond(f"Adding {command} to your task list. You have {len(st.session_state.tasks)} tasks currently in your list.")
         elif "add task" in command:
             st.session_state.listeningToTask = True
             respond("Sure, what is the task?")
