@@ -1,7 +1,5 @@
 streamlit
 gtts
 pyautogui
-speechrecognition
+SpeechRecognition
 pydub
-webbrowser
-winsound
