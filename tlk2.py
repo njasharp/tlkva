@@ -34,7 +34,7 @@ def main():
 
     st.title("Virtual Assistant")
 
-    img_path = "face.png"  # Correct the path to the uploaded image
+    img_path = "face.PNG"  # Correct the path to the uploaded image
     try:
         st.image(img_path, width=120)
     except FileNotFoundError:
