@@ -103,5 +103,12 @@ def main():
     for i, audio_fp in enumerate(st.session_state.audio_files):
         st.sidebar.audio(audio_fp, format="audio/wav", start_time=0)
 
+    if st.sidebar.button("Reset"):
+        st.session_state.tasks = ["work"]
+        st.session_state.moretasks = []
+        st.session_state.audio_files = []
+        st.session_state.listeningToTask = False
+        st.experimental_rerun()  # Rerun the script to refresh the state
+
 if __name__ == "__main__":
     main()
