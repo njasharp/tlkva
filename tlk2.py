@@ -1,101 +1,107 @@
 import streamlit as st
-import speech_recognition as sr
 from gtts import gTTS
-import winsound
 from pydub import AudioSegment
-import pyautogui
-import webbrowser
-
-def listen_for_command():
-    recognizer = sr.Recognizer()
-    with sr.Microphone() as source:
-        st.sidebar.write("Listening for commands...")
-        recognizer.adjust_for_ambient_noise(source)
-        audio = recognizer.listen(source)
-    try:
-        command = recognizer.recognize_google(audio)
-        st.write("You said:", command)
-        respond(command)
-        return command.lower()
-    except sr.UnknownValueError:
-        st.write("Could not understand audio. Please try again.")
-        return None
-    except sr.RequestError:
-        st.write("Unable to access the Speech Recognition API.")
-        return None
+from io import BytesIO
 
 def respond(response_text):
     st.write(response_text)
-    tts = gTTS(text=response_text, lang='en')
-    tts.save("response.mp3")
-    sound = AudioSegment.from_mp3("response.mp3")
-    sound.export("response.wav", format="wav")
-    winsound.PlaySound("response.wav", winsound.SND_FILENAME)
-    
-def new():
-    st.write("adding")
-    new_task = st.text_area("Type new task")
-    moretasks.append(new_task)
-    st.success(f"Added '{new_task}' to your task list.")
 
-tasks = ["work"]
-listeningToTask = False
-image_width = 120 
-moretasks = []
+def new_task():
+    st.write("Adding new task")
+    new_task = st.text_area("Type new task", key="new_task_input")
+    if new_task:
+        st.session_state.moretasks.append(new_task)
+        st.success(f"Added '{new_task}' to your task list.")
+
+def text_to_speech(text):
+    tts = gTTS(text=text, lang='en')
+    audio_fp = BytesIO()
+    tts.write_to_fp(audio_fp)
+    audio_fp.seek(0)
+    return audio_fp
 
 def main():
-    global tasks
-    global listeningToTask
-    global moretasks
-
-    respond("listening")
-    st.image("face.png", width=image_width)
-    st.title("Virtual Assistant voice control")
+    st.set_page_config(page_title="Virtual Assistant", page_icon="🤖")
     
-    st.sidebar.title("Brian C- wakeup word 'ready'")
-    st.sidebar.write("Interact with the assistant using the buttons below.")
-    st.sidebar.write("options: ready")
-    st.sidebar.write("add task, list tasks, screenshot, open youtube, exit")
-    if st.sidebar.button("press to speak"):
-        command = listen_for_command()
-        triggerKeyword = "ready"
-        
-        if command or triggerKeyword in command:
-            if listeningToTask:
-                tasks.append(command)
-                listeningToTask = False
-                respond("Adding " + command + " to your task list. You have " + str(len(tasks)) + " currently in your list.")
-            elif "add task" in command:
-                listeningToTask = True
-                respond("Sure, what is the task?")
-                new()
-            elif "list tasks" in command:
-                respond("Sure. Your tasks are:")
-                for task in tasks:
-                    respond(task)
-            elif "screenshot" in command:
-                pyautogui.screenshot("screenshot.png")
-                respond("I took a screenshot for you.")
-                st.image("screenshot.png")
-            elif "open youtube" in command:
-                respond("Opening youtube.")
-                webbrowser.open("http://www.youtube.com/")
-            elif "exit" in command:
-                respond("Goodbye!")
-                return
-            elif "ready" in command:
-                respond("i am awake - ready now")
-                return
-            else:
-                respond("Sorry, I'm not sure how to handle that command, try again.")
+    if 'tasks' not in st.session_state:
+        st.session_state.tasks = ["work"]
+    if 'listeningToTask' not in st.session_state:
+        st.session_state.listeningToTask = False
+    if 'moretasks' not in st.session_state:
+        st.session_state.moretasks = []
+    if 'audio_files' not in st.session_state:
+        st.session_state.audio_files = []
+
+    st.title("Virtual Assistant")
+
+    img_path = "face.png"  # Correct the path to the uploaded image
+    try:
+        st.image(img_path, width=120)
+    except FileNotFoundError:
+        st.warning("Image not found. Please check the path or upload the image.")
+    
+    st.sidebar.title("Brian C - wakeup word 'ready'")
+    st.sidebar.write("Interact with the assistant using the text input below.")
+    st.sidebar.write("Options: ready, add task, list tasks, open youtube, exit")
+
+    command = st.text_input("Enter your command (or type 'ready' to wake up):")
+    triggerKeyword = "ready"
+    
+    if command:
+        if st.session_state.listeningToTask:
+            st.session_state.tasks.append(command)
+            st.session_state.listeningToTask = False
+            response_text = f"Adding {command} to your task list. You have {len(st.session_state.tasks)} tasks currently in your list."
+            respond(response_text)
+            audio_fp = text_to_speech(response_text)
+            st.session_state.audio_files.append(audio_fp)
+        elif "add task" in command:
+            st.session_state.listeningToTask = True
+            respond("Sure, what is the task?")
+            new_task()
+        elif "list tasks" in command:
+            response_text = "Sure. Your tasks are:"
+            respond(response_text)
+            audio_fp = text_to_speech(response_text)
+            st.session_state.audio_files.append(audio_fp)
+            for task in st.session_state.tasks:
+                respond(task)
+                audio_fp = text_to_speech(task)
+                st.session_state.audio_files.append(audio_fp)
+        elif "open youtube" in command:
+            response_text = "Opening YouTube."
+            respond(response_text)
+            st.markdown("[Click here to open YouTube](https://www.youtube.com/)")
+            audio_fp = text_to_speech(response_text)
+            st.session_state.audio_files.append(audio_fp)
+        elif "exit" in command:
+            response_text = "Goodbye!"
+            respond(response_text)
+            audio_fp = text_to_speech(response_text)
+            st.session_state.audio_files.append(audio_fp)
+            st.stop()
+        elif "ready" in command:
+            response_text = "I am awake - ready now"
+            respond(response_text)
+            audio_fp = text_to_speech(response_text)
+            st.session_state.audio_files.append(audio_fp)
+        else:
+            response_text = "Sorry, I'm not sure how to handle that command, try again."
+            respond(response_text)
+            audio_fp = text_to_speech(response_text)
+            st.session_state.audio_files.append(audio_fp)
     
     st.sidebar.write("Tasks:")
-    for task in tasks:
+    for task in st.session_state.tasks:
         st.sidebar.write("- " + task)
     
-    st.sidebar.write(" more Tasks:")
-    for moretask in moretasks:
+    st.sidebar.write("More Tasks:")
+    for moretask in st.session_state.moretasks:
         st.sidebar.write("- " + moretask)
+
+    st.sidebar.write("Audio Responses:")
+    for i, audio_fp in enumerate(st.session_state.audio_files):
+        st.sidebar.audio(audio_fp, format="audio/wav", start_time=0)
 
 if __name__ == "__main__":
     main()
