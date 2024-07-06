@@ -1,2 +1,3 @@
 streamlit
-SpeechRecogmition
+gtts
+SpeechRecognition
