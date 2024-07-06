@@ -1,0 +1,7 @@
+streamlit
+gtts
+pyautogui
+speechrecognition
+pydub
+webbrowser
+winsound
