@@ -1,7 +1,5 @@
 import streamlit as st
-import requests
 from PIL import Image
-from io import BytesIO
 
 def listen_for_command():
     command = st.text_input("Enter your command:")
@@ -14,9 +12,9 @@ def listen_for_command():
 def respond(response_text):
     st.write(response_text)
 
-def new():
+def new_task():
     st.write("Adding new task")
-    new_task = st.text_input("Type new task")
+    new_task = st.text_input("Type new task", key="new_task_input")
     if new_task:
         st.session_state.moretasks.append(new_task)
         st.success(f"Added '{new_task}' to your task list.")
@@ -33,15 +31,17 @@ def main():
 
     st.title("Virtual Assistant")
     
-    # Display a placeholder image
-    
-    img = "face.png"
-    st.image(img, width=120)
+    # Display the image
+    img_path = "face.png"  # Correct the path to the uploaded image
+    try:
+        img = Image.open(img_path)
+        st.image(img, width=120)
+    except FileNotFoundError:
+        st.warning("Image not found. Please check the path or upload the image.")
     
     st.sidebar.title("Brian C- wakeup word 'ready'")
     st.sidebar.write("Interact with the assistant using the text input below.")
-    st.sidebar.write("options: ready")
-    st.sidebar.write("add task, list tasks, open youtube, exit")
+    st.sidebar.write("Options: ready, add task, list tasks, open youtube, exit")
 
     command = listen_for_command()
     triggerKeyword = "ready"
@@ -54,7 +54,7 @@ def main():
         elif "add task" in command:
             st.session_state.listeningToTask = True
             respond("Sure, what is the task?")
-            new()
+            new_task()
         elif "list tasks" in command:
             respond("Sure. Your tasks are:")
             for task in st.session_state.tasks:
