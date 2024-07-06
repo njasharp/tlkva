@@ -51,6 +51,7 @@ def process_command(command):
         respond(response_text)
         audio_fp = text_to_speech(response_text)
         st.session_state.audio_files.append(audio_fp)
+        st.session_state.latest_audio = audio_fp
     elif "add task" in command:
         st.session_state.listeningToTask = True
         respond("Sure, what is the task?")
@@ -60,32 +61,38 @@ def process_command(command):
         respond(response_text)
         audio_fp = text_to_speech(response_text)
         st.session_state.audio_files.append(audio_fp)
+        st.session_state.latest_audio = audio_fp
         for task in st.session_state.tasks:
             respond(task)
             audio_fp = text_to_speech(task)
             st.session_state.audio_files.append(audio_fp)
+            st.session_state.latest_audio = audio_fp
     elif "open youtube" in command:
         response_text = "Opening YouTube."
         respond(response_text)
         st.markdown("[Click here to open YouTube](https://www.youtube.com/)")
         audio_fp = text_to_speech(response_text)
         st.session_state.audio_files.append(audio_fp)
+        st.session_state.latest_audio = audio_fp
     elif "exit" in command:
         response_text = "Goodbye!"
         respond(response_text)
         audio_fp = text_to_speech(response_text)
         st.session_state.audio_files.append(audio_fp)
+        st.session_state.latest_audio = audio_fp
         st.stop()
     elif "ready" in command:
         response_text = "I am awake - ready now"
         respond(response_text)
         audio_fp = text_to_speech(response_text)
         st.session_state.audio_files.append(audio_fp)
+        st.session_state.latest_audio = audio_fp
     else:
         response_text = "Sorry, I'm not sure how to handle that command, try again."
         respond(response_text)
         audio_fp = text_to_speech(response_text)
         st.session_state.audio_files.append(audio_fp)
+        st.session_state.latest_audio = audio_fp
 
 def main():
     st.set_page_config(page_title="Virtual Assistant", page_icon="🤖")
@@ -98,6 +105,8 @@ def main():
         st.session_state.moretasks = []
     if 'audio_files' not in st.session_state:
         st.session_state.audio_files = []
+    if 'latest_audio' not in st.session_state:
+        st.session_state.latest_audio = None
 
     st.title("Virtual Assistant")
 
@@ -139,6 +148,8 @@ def main():
         st.sidebar.write("- " + moretask)
 
     st.write("Audio Responses:")
+    if st.session_state.latest_audio:
+        st.audio(st.session_state.latest_audio, format="audio/wav", start_time=0)
     for i, audio_fp in enumerate(st.session_state.audio_files):
         st.audio(audio_fp, format="audio/wav", start_time=0)
 
