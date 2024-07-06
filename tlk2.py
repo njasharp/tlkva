@@ -2,7 +2,6 @@ import streamlit as st
 from gtts import gTTS
 from pydub import AudioSegment
 from io import BytesIO
-import speech_recognition as sr
 
 def respond(response_text):
     st.write(response_text)
@@ -22,21 +21,26 @@ def text_to_speech(text):
     return audio_fp
 
 def listen_for_command():
-    recognizer = sr.Recognizer()
-    with sr.Microphone() as source:
-        st.write("Listening for commands...")
-        recognizer.adjust_for_ambient_noise(source)
-        audio = recognizer.listen(source)
     try:
-        command = recognizer.recognize_google(audio)
-        st.write("You said:", command)
-        respond(command)
-        return command.lower()
-    except sr.UnknownValueError:
-        st.write("Could not understand audio. Please try again.")
-        return None
-    except sr.RequestError:
-        st.write("Unable to access the Speech Recognition API.")
+        import speech_recognition as sr
+        recognizer = sr.Recognizer()
+        with sr.Microphone() as source:
+            st.write("Listening for commands...")
+            recognizer.adjust_for_ambient_noise(source)
+            audio = recognizer.listen(source)
+        try:
+            command = recognizer.recognize_google(audio)
+            st.write("You said:", command)
+            respond(command)
+            return command.lower()
+        except sr.UnknownValueError:
+            st.write("Could not understand audio. Please try again.")
+            return None
+        except sr.RequestError:
+            st.write("Unable to access the Speech Recognition API.")
+            return None
+    except ImportError:
+        st.write("Speech recognition is not available. Please use text input or predefined commands.")
         return None
 
 def process_command(command):
@@ -134,9 +138,9 @@ def main():
     for moretask in st.session_state.moretasks:
         st.sidebar.write("- " + moretask)
 
-    st.sidebar.write("Audio Responses:")
+    st.write("Audio Responses:")
     for i, audio_fp in enumerate(st.session_state.audio_files):
-        st.sidebar.audio(audio_fp, format="audio/wav", start_time=0)
+        st.audio(audio_fp, format="audio/wav", start_time=0)
 
     if st.sidebar.button("Reset"):
         st.session_state.tasks = ["work"]
